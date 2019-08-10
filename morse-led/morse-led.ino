@@ -1,3 +1,8 @@
+/*
+set-up:
+	GND - LED - 330 ohm - LED_PIN 
+*/
+
 #define LED_PIN 8
 #define UNIT 250 // time unit in ms
 #define DOT 1 // . = 1 time unit
@@ -11,30 +16,28 @@ void setup() {
    pinMode(LED_PIN, OUTPUT);
 }
 
-void one(char c, int led)
+void light_for(int dur, int led)
 {
-  int d = 1000;
-  boolean on=false;
+  digitalWrite(led, HIGH);
+  delay(dur);
+  digitalWrite(led, LOW);
+  delay(100);
+}
+
+void morse_char(char c, int led)
+{
+  int d = 5000;
   switch(c)
   {
     case '.':
-	    d=DOT * UNIT;
-	    on=true;
+	    d = DOT * UNIT;
 	    break;
     case '-':
-	    d=DASH * UNIT;
-	    on=true;
-	    break;
-    case '/':
-	    d=UNIT;
+	    d = DASH * UNIT;
 	    break;
   }
 
-  digitalWrite(led, on ? HIGH : LOW);
-  delay(d);
-   
-  digitalWrite(led, LOW);
-  delay(100);
+  light_for(d, led);
 }
 
 const char* letters[] ={
@@ -49,19 +52,25 @@ const char* letters[] ={
 void loop() {
   const char *message = "sos";
 
-  Serial.print("will print: ");Serial.println(message);
+  Serial.print("will print: ");
+  Serial.println(message);
+
   while(*message)
   {
-    char l[]={*message, 0};
-    Serial.print("will print: ");    Serial.println(l);
+    char letter[] = {*message, 0};
 
-    const char *x=letters[*message - 'a'];
-    while(*x)
+    Serial.print("will print: ");    
+    Serial.println(letter);
+
+    const char *dashdot = letters[*message - 'a'];
+    while(*dashdot)
     {
-      one(*x, LED_PIN);
-      x++;
+      morse_char(*dashdot++, LED_PIN);
     }
-    one('/',LED_PIN);
+
+    digitalWrite(LED_PIN, LOW);
+    delay(LETTER * UNIT);
+
     message++; 
   }
   digitalWrite(LED_PIN, LOW);
